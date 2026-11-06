@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Палітра кольорів застосунку (відповідає макетам з ЛР2).
+/// Палітра кольорів застосунку 
 class AppColors {
   AppColors._();
 

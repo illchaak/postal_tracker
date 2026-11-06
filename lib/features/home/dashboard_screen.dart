@@ -8,6 +8,7 @@ import '../../core/widgets/app_card.dart';
 import '../../core/widgets/page_header.dart';
 import '../../core/widgets/shipment_tile.dart';
 import '../../core/widgets/stat_card.dart';
+import '../../core/widgets/user_builder.dart';
 import '../../models/shipment_status.dart';
 import '../shipments/shipment_details_screen.dart';
 import '../shipments/shipment_form_screen.dart';
@@ -24,7 +25,6 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const user = MockData.user;
     const shipments = MockData.shipments;
 
     final activeCount = shipments.where((s) => s.status.isActive).length;
@@ -40,13 +40,16 @@ class DashboardScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          PageHeader(
-            title: 'Вітаємо, ${user.greetingName}!',
-            subtitle: 'У вас $activeCount активні відправлення',
-            action: AppButton(
-              label: 'Нова посилка',
-              icon: Icons.add,
-              onPressed: () => ShipmentFormScreen.open(context),
+          // Ім'я користувача береться з Firebase Authentication.
+          UserBuilder(
+            builder: (context, user) => PageHeader(
+              title: 'Вітаємо, ${user.firstName}!',
+              subtitle: 'У вас $activeCount активні відправлення',
+              action: AppButton(
+                label: 'Нова посилка',
+                icon: Icons.add,
+                onPressed: () => ShipmentFormScreen.open(context),
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.large),

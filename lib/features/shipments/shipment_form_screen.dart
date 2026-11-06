@@ -8,7 +8,9 @@ import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/app_dropdown.dart';
 import '../../core/widgets/app_text_field.dart';
+import '../../core/utils/validators.dart';
 import '../../core/widgets/breadcrumbs.dart';
+import '../../data/repositories/auth_repository.dart';
 import '../../models/shipment.dart';
 import '../../models/shipment_status.dart';
 
@@ -30,6 +32,7 @@ class ShipmentFormScreen extends StatefulWidget {
 }
 
 class _ShipmentFormScreenState extends State<ShipmentFormScreen> {
+  final _formKey = GlobalKey<FormState>();
   late String _carrier;
   late bool _isIncoming;
   late ShipmentStatus _status;
@@ -70,7 +73,9 @@ class _ShipmentFormScreenState extends State<ShipmentFormScreen> {
   }
 
   void _save() {
-    // TODO(lab4+): валідація та збереження в базі даних.
+    // Локальна валідація обов'язкових полів.
+    if (!_formKey.currentState!.validate()) return;
+    // TODO(ЛР5): збереження відправлення в Cloud Firestore.
     Navigator.of(context).pop();
   }
 
@@ -89,7 +94,9 @@ class _ShipmentFormScreenState extends State<ShipmentFormScreen> {
           Text(title, style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: AppSpacing.large),
           AppCard(
-            child: Column(
+            child: Form(
+              key: _formKey,
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _twoColumns(
@@ -97,11 +104,13 @@ class _ShipmentFormScreenState extends State<ShipmentFormScreen> {
                     label: 'Назва відправлення *',
                     initialValue: shipment?.title,
                     hint: 'Наприклад, «Книги для навчання»',
+                    validator: (value) => Validators.requiredField(value, message: 'Введіть назву відправлення'),
                   ),
                   AppTextField(
                     label: 'Номер ТТН *',
                     initialValue: shipment?.trackingNumber,
                     hint: '14 цифр для Нової пошти',
+                    validator: Validators.trackingNumber,
                   ),
                 ),
                 _twoColumns(
@@ -125,7 +134,7 @@ class _ShipmentFormScreenState extends State<ShipmentFormScreen> {
                   ),
                   AppTextField(
                     label: 'Отримувач',
-                    initialValue: shipment?.recipient ?? MockData.user.fullName,
+                    initialValue: shipment?.recipient ?? AuthRepository.instance.currentProfile?.fullName,
                   ),
                 ),
                 _twoColumns(
@@ -204,6 +213,7 @@ class _ShipmentFormScreenState extends State<ShipmentFormScreen> {
                   ],
                 ),
               ],
+            ),
             ),
           ),
         ],

@@ -1,21 +1,16 @@
 import '../../models/shipment.dart';
 import '../../models/shipment_status.dart';
 import '../../models/status_event.dart';
-import '../../models/user_profile.dart';
 
-/// Тестові (hardcoded) дані замість реального сервера.
-/// Буде замінено на Firebase у наступних лабораторних роботах.
+/// Тестові (hardcoded) дані.
+/// Дані користувача з ЛР4 беруться з Firebase Authentication,
+/// а посилки поки залишаються тестовими (Cloud Firestore — у наступних ЛР).
 class MockData {
   MockData._();
 
-  static const UserProfile user = UserProfile(
-    fullName: 'Інна Люльчак',
-    greetingName: 'Інно',
-    email: 'inna.l@gmail.com',
-    phone: '+380 67 123 45 67',
-    language: 'Українська',
-    passwordChangedAt: '12.09.2026',
-  );
+  /// Заглушки полів профілю, яких немає у Firebase Authentication.
+  static const String stubPhone = '+380 67 123 45 67';
+  static const String stubLanguage = 'Українська';
 
   static const List<String> carriers = ['Нова пошта', 'Укрпошта', 'Meest', 'Інший'];
 

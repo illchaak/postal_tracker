@@ -1,27 +1,28 @@
-/// Дані профілю користувача.
+/// Дані профілю користувача, які показуються в інтерфейсі.
+/// Створюються з облікового запису Firebase Authentication
+/// (див. AuthRepository), тому екрани не залежать від Firebase напряму.
 class UserProfile {
   const UserProfile({
+    required this.uid,
     required this.fullName,
-    required this.greetingName,
     required this.email,
-    required this.phone,
-    required this.language,
-    required this.passwordChangedAt,
+    this.photoUrl,
   });
 
+  /// Унікальний ідентифікатор користувача у Firebase.
+  final String uid;
   final String fullName;
-
-  /// Ім'я у кличному відмінку для привітання («Інно»).
-  final String greetingName;
   final String email;
-  final String phone;
-  final String language;
-  final String passwordChangedAt;
+
+  /// HTTPS-посилання на фото профілю (може бути відсутнім).
+  final String? photoUrl;
+
+  String get firstName => fullName.split(' ').first;
 
   String get initials => fullName
       .split(' ')
       .where((part) => part.isNotEmpty)
       .take(2)
-      .map((part) => part[0])
+      .map((part) => part[0].toUpperCase())
       .join();
 }

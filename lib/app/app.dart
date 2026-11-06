@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../core/theme/app_theme.dart';
+import '../data/services/analytics_service.dart';
 import 'app_routes.dart';
 
 /// Кореневий віджет застосунку «Поштовий трекер».
@@ -22,7 +23,9 @@ class PostalTrackerApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      initialRoute: AppRoutes.login,
+      // Firebase Analytics: автоматичне відстеження переходів між екранами.
+      navigatorObservers: [AnalyticsService.instance.observer],
+      initialRoute: AppRoutes.root,
       routes: AppRoutes.routes,
     );
   }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 
-/// Стилізоване поле введення з підписом.
+/// Стилізоване поле введення з підписом і перевіркою (validator).
 /// Для паролів показує кнопку «показати / сховати пароль».
 class AppTextField extends StatefulWidget {
   const AppTextField({
@@ -19,7 +19,13 @@ class AppTextField extends StatefulWidget {
     this.helperText,
     this.maxLines = 1,
     this.readOnly = false,
+    this.enabled = true,
     this.onTap,
+    this.validator,
+    this.textInputAction,
+    this.onFieldSubmitted,
+    this.onChanged,
+    this.autofillHints,
   });
 
   final String? label;
@@ -35,7 +41,15 @@ class AppTextField extends StatefulWidget {
 
   /// Поле лише для читання (наприклад, вибір дати через календар).
   final bool readOnly;
+  final bool enabled;
   final VoidCallback? onTap;
+
+  /// Функція перевірки: повертає текст помилки або null.
+  final FormFieldValidator<String>? validator;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
+  final ValueChanged<String>? onChanged;
+  final Iterable<String>? autofillHints;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -100,15 +114,25 @@ class _AppTextFieldState extends State<AppTextField> {
           keyboardType: widget.keyboardType,
           maxLines: widget.isPassword ? 1 : widget.maxLines,
           readOnly: widget.readOnly,
+          enabled: widget.enabled,
           onTap: widget.onTap,
+          validator: widget.validator,
+          textInputAction: widget.textInputAction,
+          onFieldSubmitted: widget.onFieldSubmitted,
+          onChanged: widget.onChanged,
+          autofillHints: widget.autofillHints,
+          // Помилка показується, щойно користувач почав виправляти поле.
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           style: textTheme.bodyMedium,
           decoration: InputDecoration(
             hintText: widget.hint,
             hintStyle: const TextStyle(color: AppColors.textHint, fontSize: 13),
             helperText: widget.helperText,
+            helperMaxLines: 2,
+            errorMaxLines: 2,
             isDense: true,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: widget.enabled ? Colors.white : AppColors.surfaceMuted,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.normal,
               vertical: 13,
@@ -119,7 +143,10 @@ class _AppTextFieldState extends State<AppTextField> {
             suffixIcon: _buildSuffix(),
             border: _border(AppColors.fieldBorder),
             enabledBorder: _border(AppColors.fieldBorder),
+            disabledBorder: _border(AppColors.border),
             focusedBorder: _border(AppColors.primary, 2),
+            errorBorder: _border(AppColors.danger),
+            focusedErrorBorder: _border(AppColors.danger, 2),
           ),
         ),
       ],

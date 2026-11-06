@@ -8,6 +8,7 @@ import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/breadcrumbs.dart';
 import '../../core/widgets/status_badge.dart';
+import '../../data/services/analytics_service.dart';
 import '../../models/shipment.dart';
 import '../../models/status_event.dart';
 import 'delete_shipment_dialog.dart';
@@ -23,6 +24,8 @@ class ShipmentDetailsScreen extends StatelessWidget {
 
   /// Відкрити екран деталей у поточному розділі.
   static void open(BuildContext context, Shipment shipment) {
+    // Власна подія Firebase Analytics: користувач відкрив посилку.
+    AnalyticsService.instance.logShipmentOpened(shipment);
     Navigator.of(context).push(AppRoutes.page(ShipmentDetailsScreen(shipment: shipment)));
   }
 

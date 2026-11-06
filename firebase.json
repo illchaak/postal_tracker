@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"macos":{"default":{"projectId":"postal-tracker-7e7ce","appId":"1:854968114356:ios:a71e8b53f39342c8f5cbe1","uploadDebugSymbols":true,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"postal-tracker-7e7ce","configurations":{"macos":"1:854968114356:ios:a71e8b53f39342c8f5cbe1"}}}}}}

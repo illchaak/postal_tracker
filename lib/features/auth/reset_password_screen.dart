@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/validators.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/auth_layout.dart';
+import '../../core/widgets/message_banner.dart';
+import '../../data/repositories/auth_exception.dart';
+import '../../data/repositories/auth_repository.dart';
 
 /// Екран відновлення пароля через email (FR3).
-/// Лист не надсилається — лише показується повідомлення.
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
 
@@ -15,13 +18,41 @@ class ResetPasswordScreen extends StatefulWidget {
 }
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
-  bool _isEmailSent = false;
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
 
-  void _sendResetLink() {
-    // TODO(lab4+): FirebaseAuth.sendPasswordResetEmail(...)
+  bool _isLoading = false;
+  String? _errorMessage;
+  String? _successMessage;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sendResetLink() async {
+    if (_isLoading) return;
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() {
-      _isEmailSent = true;
+      _isLoading = true;
+      _errorMessage = null;
+      _successMessage = null;
     });
+
+    try {
+      final email = _emailController.text.trim();
+      await AuthRepository.instance.sendPasswordResetEmail(email: email);
+      if (mounted) {
+        setState(() => _successMessage =
+            'Якщо акаунт з поштою $email існує, ми надіслали лист із посиланням для зміни пароля. Перевірте також папку «Спам».');
+      }
+    } on AuthException catch (e) {
+      if (mounted) setState(() => _errorMessage = e.message);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -35,10 +66,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           child: Container(
             width: 60,
             height: 60,
-            decoration: const BoxDecoration(
-              color: AppColors.primaryLight,
-              shape: BoxShape.circle,
-            ),
+            decoration: const BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
             child: const Icon(Icons.mail_outline, color: AppColors.primary, size: 26),
           ),
         ),
@@ -52,39 +80,34 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           style: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary, height: 1.4),
         ),
         const SizedBox(height: 24),
-        const AppTextField(
-          label: 'Електронна пошта',
-          hint: 'name@example.com',
-          keyboardType: TextInputType.emailAddress,
+        Form(
+          key: _formKey,
+          child: AppTextField(
+            label: 'Електронна пошта',
+            hint: 'name@example.com',
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.done,
+            enabled: !_isLoading,
+            validator: Validators.email,
+            onFieldSubmitted: (_) => _sendResetLink(),
+          ),
         ),
         const SizedBox(height: 18),
         AppButton(
-          label: 'Надіслати посилання',
+          label: _isLoading ? 'Надсилання…' : 'Надіслати посилання',
           expanded: true,
           height: 40,
+          isLoading: _isLoading,
           onPressed: _sendResetLink,
         ),
-        if (_isEmailSent) ...[
+        if (_successMessage != null) ...[
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.successLight,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.check_circle_outline, size: 18, color: AppColors.success),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Лист для відновлення пароля надіслано',
-                    style: TextStyle(color: AppColors.success, fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          MessageBanner(message: _successMessage!, type: MessageType.success),
+        ],
+        if (_errorMessage != null) ...[
+          const SizedBox(height: 16),
+          MessageBanner(message: _errorMessage!),
         ],
         const SizedBox(height: 16),
         Center(

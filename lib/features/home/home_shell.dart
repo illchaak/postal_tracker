@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../../app/app_routes.dart';
 import '../../core/data/mock_data.dart';
 import '../../core/widgets/app_sidebar.dart';
+import '../../core/widgets/user_builder.dart';
+import '../../data/repositories/auth_repository.dart';
+import '../../data/services/analytics_service.dart';
 import '../profile/profile_screen.dart';
 import '../shipments/shipments_screen.dart';
 import 'dashboard_screen.dart';
@@ -21,10 +24,32 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _selectedIndex = 0;
 
+  static const _screenNames = ['dashboard', 'shipments', 'profile'];
+
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.instance.logScreen(_screenNames[_selectedIndex]);
+    // Після побудови екрана показуємо стан сеансу:
+    // успішний вхід/реєстрація або відновлений сеанс.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showSessionMessage());
+  }
+
+  void _showSessionMessage() {
+    if (!mounted) return;
+    final repository = AuthRepository.instance;
+    final message = repository.takePendingMessage() ??
+        'Сеанс відновлено. Ви увійшли як ${repository.currentProfile?.email ?? ''}';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating, width: 460),
+    );
+  }
+
   void _selectSection(int index) {
     setState(() {
       _selectedIndex = index;
     });
+    AnalyticsService.instance.logScreen(_screenNames[index]);
   }
 
   Widget _buildSection(int index) {
@@ -50,11 +75,14 @@ class _HomeShellState extends State<HomeShell> {
     return Scaffold(
       body: Row(
         children: [
-          AppSidebar(
-            items: sidebarItems,
-            selectedIndex: _selectedIndex,
-            onSelected: _selectSection,
-            user: MockData.user,
+          // Дані користувача в бічній панелі оновлюються після зміни профілю.
+          UserBuilder(
+            builder: (context, user) => AppSidebar(
+              items: sidebarItems,
+              selectedIndex: _selectedIndex,
+              onSelected: _selectSection,
+              user: user,
+            ),
           ),
           Expanded(
             child: Navigator(

@@ -88,7 +88,7 @@ class AppSidebar extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               children: [
-                UserAvatar(initials: user.initials, radius: 17),
+                UserAvatar(initials: user.initials, photoUrl: user.photoUrl, radius: 17),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
